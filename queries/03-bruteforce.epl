@@ -1,0 +1,19 @@
+@Name('Schema')
+@Tag(name='timestamp', value='ipfix.flowEndMilliseconds')
+create map schema IPFIX(
+ipfix.flowEndMilliseconds int,
+ipfix.flowStartMilliseconds int,
+ipfix.sourceIPv4Address string,
+ipfix.destinationIPv4Address string,
+ipfix.HTTPRequestHost string,
+ipfix.HTTPRequestURL string,
+ipfix.packetDeltaCount int);
+
+@Name('Output')
+SELECT ipfix.sourceIPv4Address as Attacker, ipfix.destinationIPv4Address as Destination,
+	ipfix.HTTPRequestHost as Host, ipfix.HTTPRequestURL as URL,
+	count(*) as AtkCount
+FROM IPFIX.win:time(1 min)
+WHERE ipfix.HTTPRequestURL LIKE "%login%" or ipfix.HTTPRequestURL LIKE "%admin%" or ipfix.HTTPRequestURL LIKE "%auth%"
+GROUP BY ipfix.sourceIPv4Address, ipfix.destinationIPv4Address, ipfix.HTTPRequestURL
+HAVING count(*) > 16;

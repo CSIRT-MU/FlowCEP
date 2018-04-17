@@ -1,0 +1,18 @@
+@Name('Schema')
+@Tag(name='timestamp', value='ipfix.flowEndMilliseconds')
+create map schema IPFIX(
+ipfix.flowEndMilliseconds int,
+ipfix.flowStartMilliseconds int,
+ipfix.destinationTransportPort int,
+ipfix.sourceIPv4Address string,
+ipfix.destinationIPv4Address string,
+ipfix.packetDeltaCount int,
+ipfix.protocolIdentifier int);
+
+@Name('Output')
+SELECT ipfix.sourceIPv4Address as attacker, ipfix.destinationTransportPort as destPort,
+	count(*) as AtkCount
+FROM IPFIX.win:time_batch(1 minute)
+WHERE ipfix.packetDeltaCount < 10 AND ipfix.protocolIdentifier = 6
+GROUP BY ipfix.sourceIPv4Address, ipfix.destinationTransportPort
+HAVING count(*) > 16;

@@ -1,0 +1,53 @@
+@Name('Schema')
+@Tag(name='timestamp', value='ipfix.flowEndMilliseconds')
+create map schema IPFIX(
+ipfix.flowEndMilliseconds int,
+ipfix.flowStartMilliseconds int,
+ipfix.destinationTransportPort int,
+ipfix.sourceIPv4Address string,
+ipfix.destinationIPv4Address string,
+ipfix.HTTPRequestHost string,
+ipfix.HTTPRequestURL string,
+ipfix.packetDeltaCount int);
+
+@Name('TCPSYNscan')
+INSERT INTO TCPSYNscan
+SELECT ipfix.sourceIPv4Address as Attacker, ipfix.destinationTransportPort as destPort,
+	count(*) as AtkCount
+FROM IPFIX.win:time_batch(1 minute)
+WHERE ipfix.packetDeltaCount < 10
+GROUP BY ipfix.sourceIPv4Address, ipfix.destinationTransportPort
+HAVING count(*) > 16;
+
+@Name('HTTPscanUniques')
+INSERT INTO Uniques
+SELECT ipfix.sourceIPv4Address, ipfix.HTTPRequestURL, ipfix.destinationIPv4Address, count(*)
+FROM IPFIX.win:time_batch(1 minute)
+WHERE ipfix.HTTPRequestURL NOT LIKE ""
+GROUP BY ipfix.sourceIPv4Address, ipfix.HTTPRequestURL, ipfix.destinationIPv4Address
+HAVING count(*) < 3;
+
+@Name('HTTPscan')
+INSERT INTO HTTPscan
+SELECT Uniques.ipfix.sourceIPv4Address as Scanner, Uniques.ipfix.HTTPRequestURL as URL,
+	count(*) as atkCount
+FROM Uniques.win:time_batch(2 minutes)
+GROUP BY Uniques.ipfix.sourceIPv4Address, Uniques.ipfix.HTTPRequestURL
+HAVING count(*) > 16;
+
+@Name('BruteForce')
+INSERT INTO BruteForce
+SELECT ipfix.sourceIPv4Address as Attacker, ipfix.destinationIPv4Address as Destination,
+	ipfix.HTTPRequestHost as Host, ipfix.HTTPRequestURL as URL,
+	count(*) as atkCount
+FROM IPFIX.win:time_batch(1 minute)
+WHERE ipfix.HTTPRequestURL LIKE "%login%" or ipfix.HTTPRequestURL LIKE "%admin%" or ipfix.HTTPRequestURL LIKE "%auth%"
+GROUP BY ipfix.sourceIPv4Address, ipfix.destinationIPv4Address, ipfix.HTTPRequestURL
+HAVING count(*) > 16;
+
+@Name('Output')
+SELECT TCPSYNscan.Attacker as Attacker, max(TCPSYNscan.AtkCount) as TCPSYNscanCount,
+	max(HTTPscan.atkCount) as HTTPscanCount, max(BruteForce.atkCount) as BruteForceCount
+FROM TCPSYNscan.win:time_batch(5 minutes), HTTPscan.win:time_batch(5 minutes), BruteForce.win:time_batch(5 minutes)
+WHERE TCPSYNscan.Attacker = HTTPscan.Scanner AND TCPSYNscan.Attacker = BruteForce.Attacker
+GROUP BY TCPSYNscan.Attacker

@@ -1,0 +1,26 @@
+@Name('Schema')
+@Tag(name='timestamp', value='ipfix.flowEndMilliseconds')
+create map schema IPFIX(
+ipfix.flowEndMilliseconds int,
+ipfix.flowStartMilliseconds int,
+ipfix.packetDeltaCount int,
+ipfix.sourceIPv4Address string,
+ipfix.destinationIPv4Address string,
+ipfix.HTTPRequestHost string,
+ipfix.HTTPRequestURL string);
+
+@Name('Uniques')
+INSERT INTO Uniques
+SELECT ipfix.sourceIPv4Address, ipfix.HTTPRequestURL, ipfix.destinationIPv4Address, count(*)
+FROM IPFIX.win:time_batch(1 minute)
+WHERE ipfix.HTTPRequestURL NOT LIKE ""
+GROUP BY ipfix.sourceIPv4Address, ipfix.HTTPRequestURL, ipfix.destinationIPv4Address
+HAVING count(*) < 3;
+
+
+@Name('Output')
+SELECT Uniques.ipfix.sourceIPv4Address as Scanner, Uniques.ipfix.HTTPRequestURL as URL,
+	count(*) as Count
+FROM Uniques.win:time_batch(2 minutes)
+GROUP BY Uniques.ipfix.sourceIPv4Address, Uniques.ipfix.HTTPRequestURL
+HAVING count(*) > 16;

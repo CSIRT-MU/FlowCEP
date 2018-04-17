@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ipfix xmlns="urn:ietf:params:xml:ns:yang:ietf-ipfix-psamp">
+	
+	<collectingProcess>
+		<name>TCP collector</name>
+		<tcpCollector>
+			<name>Listening port 4739</name>
+			<localPort>4739</localPort>
+			<localIPAddress></localIPAddress>
+		</tcpCollector>
+		<exportingProcess>json</exportingProcess>
+	</collectingProcess>
+
+	<!--## Exporting process configuration -->
+	<exportingProcess>
+		<name>json</name>
+		<destination>
+                     <name>JSON storage plugin</name>
+                     <fileWriter>
+                          <fileFormat>json</fileFormat>
+                          <metadata>no</metadata>
+                          <tcpFlags>formated</tcpFlags>
+                          <timestamp>plain</timestamp>
+                          <protocol>raw</protocol>
+                          <ignoreUnknown>yes</ignoreUnknown>
+                          <nonPrintableChar>no</nonPrintableChar>
+
+                          <output>
+                               <type>send</type>
+                               <ip>127.0.0.1</ip>
+                               <port>4444</port>
+                               <protocol>udp</protocol>
+                          </output>
+			</fileWriter>
+                </destination>
+	</exportingProcess>
+
+	<intermediatePlugins>
+		<timenow/>
+	</intermediatePlugins>
+
+</ipfix>
