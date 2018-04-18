@@ -64,7 +64,17 @@ ipfixsend -i /vagrant/data/data.ipfix -R 1.0 -d 127.0.0.1 -t TCP &
 
 Run `espercli`, load a specific EPL script. Note that the espercli does read from standard input.
 ```
-socat -u UDP-LISTEN:4444 STDOUT | espercli -m /vagrant/queries/http/Complete_non_grouped.epl
+socat -u UDP-LISTEN:4444 STDOUT | espercli -m /vagrant/queries/11-Multiphase_non_grouped.epl
 ```
 
 The results of the queries are printed on standard output.
+
+## Acknowledgement
+
+This software package is an attachment to the demo paper "Rapid Prototyping of Flow-Based Detection Methods Using Complex Event Processing" presented at IFIP/IEEE NOMS 2018 conference.
+
+Petr Velan, Martin Husák, Daniel Tovarňák: "Rapid Prototyping of Flow-Based Detection Methods Using Complex Event Processing" In Proceedings of IEEE/IFIP Network Operations and Management Symposium. Taipei. 2018. IEEE.
+
+More information on the sample attack can be found in the earlier research paper "Security monitoring of HTTP traffic using extended flows" presented at FARES workshop of ARES 2015 conference.
+
+Martin Husák, Petr Velan, and Jan Vykopal. Security monitoring of HTTP traffic using extended flows. In 2015 10th International Conference on Availability, Reliability and Security, pages 258--265, Toulouse, 2015. IEEE.
