@@ -4,6 +4,10 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
   config.vm.network :private_network, ip: "10.0.15.105"
+	config.vm.provider "virtualbox" do |vb|
+		vb.memory = "4096"
+		vb.cpus = 4
+	end
 
   # Enable provisioning with a shell script.
    config.vm.provision "shell", inline: <<-SHELL
@@ -39,7 +43,10 @@ sudo rpm -ivh /tmp/elastic.rpm
 sudo rpm -ivh /tmp/kibana.rpm
 sudo rpm -ivh /tmp/logstash.rpm
 
-sudo wget https://raw.githubusercontent.com/CSIRT-MU/FlowCEP/master/logstash/01-logs.conf -O /etc/logstash/conf.d/01-logs.conf
+sudo cp /vagrant/logstash/01-logs.conf /etc/logstash/conf.d/01-logs.conf
+sudo chmod +r /etc/logstash/conf.d/01-logs.conf
+
+/vagrant/logstash/configelk.sh
 
 sudo systemctl enable elasticsearch
 sudo systemctl enable kibana
