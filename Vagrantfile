@@ -3,6 +3,7 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
+  config.vm.network :private_network, ip: "10.0.15.105"
 
   # Enable provisioning with a shell script.
    config.vm.provision "shell", inline: <<-SHELL
@@ -29,6 +30,24 @@ sudo cp /vagrant/espercli/espercli /usr/local/bin/
 # install IPFIXcol
 sudo wget 'https://copr.fedorainfracloud.org/coprs/g/CESNET/IPFIXcol/repo/epel-7/group_CESNET-IPFIXcol-epel-7.repo' -O /etc/yum.repos.d/COPR-IPFIXcol.repo
 sudo yum install -y ipfixcol ipfixcol-json-output
+
+sudo wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.4.rpm -O /tmp/elastic.rpm
+sudo wget https://artifacts.elastic.co/downloads/kibana/kibana-6.2.4-x86_64.rpm -O /tmp/kibana.rpm
+sudo wget https://artifacts.elastic.co/downloads/logstash/logstash-6.2.4.rpm -O /tmp/logstash.rpm
+
+sudo rpm -ivh /tmp/elastic.rpm
+sudo rpm -ivh /tmp/kibana.rpm
+sudo rpm -ivh /tmp/logstash.rpm
+
+sudo wget https://raw.githubusercontent.com/CSIRT-MU/FlowCEP/master/logstash/01-logs.conf -O /etc/logstash/conf.d/01-logs.conf
+
+sudo systemctl enable elasticsearch
+sudo systemctl enable kibana
+sudo systemctl enable logstash
+
+sudo systemctl start elasticsearch
+sudo systemctl start kibana
+sudo systemctl start logstash
 
    SHELL
 end
