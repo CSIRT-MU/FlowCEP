@@ -43,7 +43,16 @@ public class EsperMain {
 
         Module module = epService.getEPAdministrator().getDeploymentAdmin().read(new File(esperCLI.getModule()));
         epService.getEPAdministrator().getDeploymentAdmin().deploy(module, null);
-        epService.getEPAdministrator().getStatement("Output").addListener(new SystemOutListener());
+
+        for (String name : esperCLI.getOutput()) {
+            EPStatement statement = epService.getEPAdministrator().getStatement(name);
+            if (statement == null) {
+                System.err.printf("Statement '%s' does not exist.", name);
+                System.exit(1);
+            } else {
+                statement.addListener(new SystemOutListener());
+            }
+        }
 
         EPStatement schemaStatement = epService.getEPAdministrator().getStatement("Schema");
         EventSender eventSender = epService.getEPRuntime().getEventSender(schemaStatement.getEventType().getName());
