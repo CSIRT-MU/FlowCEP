@@ -29,6 +29,7 @@ public class SystemOutListener implements StatementAwareUpdateListener {
                 Instant instant = new Date(epServiceProvider.getEPRuntime().getCurrentTime()).toInstant();
                 ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, TimeZone.getDefault().toZoneId());
                 map.put("timestamp", zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+                map.put("type", newEvent.getEventType().getName());
                 System.out.println(this.objectMapper.writeValueAsString(map));
             } catch (IOException e) {
                 e.printStackTrace();
