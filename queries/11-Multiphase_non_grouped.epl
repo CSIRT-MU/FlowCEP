@@ -47,7 +47,7 @@ HAVING count(*) > 16;
 
 @Name('Output')
 INSERT INTO DetectionResults
-SELECT TCPSYNscan.Attacker as attacker, TCPSYNscan.AtkCount as TCPSYNscanCount,
+SELECT TCPSYNscan.Attacker as Attacker, TCPSYNscan.AtkCount as TCPSYNscanCount,
 	HTTPscan.AtkCount as HTTPscanCount, BruteForce.AtkCount as BruteForceCount
 FROM TCPSYNscan.win:time_batch(5 minutes), HTTPscan.win:time_batch(5 minutes), BruteForce.win:time_batch(5 minutes)
 WHERE TCPSYNscan.Attacker = HTTPscan.Scanner AND TCPSYNscan.Attacker = BruteForce.Attacker

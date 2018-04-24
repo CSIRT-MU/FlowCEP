@@ -75,7 +75,11 @@ Note that the output of espercli was expanded to output the results of partial d
 socat -u UDP-LISTEN:4444 STDOUT | espercli -m /vagrant/queries/11-Multiphase_non_grouped.epl -o 'TCPSYNscan,HTTPscan,BruteForce,Output' | socat - TCP:localhost:12345
 ```
 
-An example visualisations and dashboard for Kibana are saved in the `kibana/configuration.json` file. It can be loaded via `Management/Saved Objects/Import` menu.
+An example visualisations and dashboard for Kibana are saved in the `kibana/configuration.json` file. 
+It can be loaded via `Management/Saved Objects/Import` menu, but you need to create an index 
+called `logstash-*` first (available in the Discover menu after the data start flowing to Elasticsearch).
+It is best to keep it running for cca 10 minutes before analysing the data in Kafka, since it takes
+some time to replay the network traffic and apply the detection algorithms.
 
 ## Acknowledgement
 
