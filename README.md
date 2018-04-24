@@ -25,7 +25,7 @@ Run the demo script
 /vagrant/run.sh
 ```
 
-Results of the detection should be visible after few minutes.
+Results of the detection should be visible in Kibana at http://10.0.15.105:5601 after few minutes.
 
 ## Detailed Guide
 
@@ -64,10 +64,18 @@ ipfixsend -i /vagrant/data/data.ipfix -R 1.0 -d 127.0.0.1 -t TCP &
 
 Run `espercli`, load a specific EPL script. Note that the espercli does read from standard input.
 ```
-socat -u UDP-LISTEN:4444 STDOUT | espercli -m /vagrant/queries/11-Multiphase_non_grouped.epl
+socat -u UDP-LISTEN:4444 STDOUT | espercli -m /vagrant/queries/11-Multiphase_non_grouped.epl -o 'Output'
 ```
 
-The results of the queries are printed on standard output.
+The results of the queries are printed on standard output. If you want to process the results
+in Elasticsearch and display them in Kibana, just pipe the output to Logstash at port TCP/12345.
+Note that the output of espercli was expanded to output the results of partial detections as well.
+
+```
+socat -u UDP-LISTEN:4444 STDOUT | espercli -m /vagrant/queries/11-Multiphase_non_grouped.epl -o 'TCPSYNscan,HTTPscan,BruteForce,Output' | socat - TCP:localhost:12345
+```
+
+An example visualisations and dashboard for Kibana are saved in the `kibana/configuration.json` file. It can be loaded via `Management/Saved Objects/Import` menu.
 
 ## Acknowledgement
 

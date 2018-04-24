@@ -30,7 +30,7 @@ HAVING count(*) < 3;
 @Name('HTTPscan')
 INSERT INTO HTTPscan
 SELECT Uniques.ipfix.sourceIPv4Address as Scanner, Uniques.ipfix.HTTPRequestURL as URL,
-	count(*) as atkCount
+	count(*) as AtkCount
 FROM Uniques.win:time_batch(2 minutes)
 GROUP BY Uniques.ipfix.sourceIPv4Address, Uniques.ipfix.HTTPRequestURL
 HAVING count(*) > 16;
@@ -39,14 +39,15 @@ HAVING count(*) > 16;
 INSERT INTO BruteForce
 SELECT ipfix.sourceIPv4Address as Attacker, ipfix.destinationIPv4Address as Destination,
 	ipfix.HTTPRequestHost as Host, ipfix.HTTPRequestURL as URL,
-	count(*) as atkCount
+	count(*) as AtkCount
 FROM IPFIX.win:time_batch(1 minute)
 WHERE ipfix.HTTPRequestURL LIKE "%login%" or ipfix.HTTPRequestURL LIKE "%admin%" or ipfix.HTTPRequestURL LIKE "%auth%"
 GROUP BY ipfix.sourceIPv4Address, ipfix.destinationIPv4Address, ipfix.HTTPRequestURL
 HAVING count(*) > 16;
 
 @Name('Output')
+INSERT INTO DetectionResults
 SELECT TCPSYNscan.Attacker as attacker, TCPSYNscan.AtkCount as TCPSYNscanCount,
-	HTTPscan.atkCount as HTTPscanCount, BruteForce.atkCount as BruteForceCount
+	HTTPscan.AtkCount as HTTPscanCount, BruteForce.AtkCount as BruteForceCount
 FROM TCPSYNscan.win:time_batch(5 minutes), HTTPscan.win:time_batch(5 minutes), BruteForce.win:time_batch(5 minutes)
 WHERE TCPSYNscan.Attacker = HTTPscan.Scanner AND TCPSYNscan.Attacker = BruteForce.Attacker
